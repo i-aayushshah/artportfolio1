@@ -3,8 +3,14 @@ import Artwork from '../../../models/Artwork';
 import Subscriber from '../../../models/Subscriber';
 const { authenticateAdmin } = require('../../../lib/auth');
 import nodemailer from 'nodemailer';
-import path from 'path';
-import fs from 'fs';
+const { v2: cloudinary } = require('cloudinary');
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Email notification function
 const notifySubscribers = async (artwork) => {
@@ -184,17 +190,20 @@ export default async function handler(req, res) {
           });
         }
 
-        // Delete the image file if it's uploaded locally
-        if (artwork.image && artwork.image.startsWith('/images/')) {
-          const imagePath = path.join(process.cwd(), 'public', artwork.image);
+        // Delete the image from Cloudinary if it's a Cloudinary URL
+        if (artwork.image && artwork.image.includes('cloudinary.com')) {
           try {
-            if (fs.existsSync(imagePath)) {
-              fs.unlinkSync(imagePath);
-              console.log(`Deleted image file: ${imagePath}`);
-            }
+            // Extract public ID from Cloudinary URL
+            const urlParts = artwork.image.split('/');
+            const publicIdWithExtension = urlParts[urlParts.length - 1];
+            const publicId = publicIdWithExtension.split('.')[0];
+            const folderPath = 'art-portfolio/' + publicId;
+
+            await cloudinary.uploader.destroy(folderPath);
+            console.log(`Deleted image from Cloudinary: ${folderPath}`);
           } catch (fileError) {
-            console.error('Error deleting image file:', fileError);
-            // Continue with artwork deletion even if file deletion fails
+            console.error('Error deleting image from Cloudinary:', fileError);
+            // Continue with artwork deletion even if image deletion fails
           }
         }
 

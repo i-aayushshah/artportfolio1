@@ -12,16 +12,22 @@ function ImageUpload({ label, value, onChange, preview, setPreview, uploading, s
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('image', file);
+      // Convert file to base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
       const token = localStorage.getItem('adminToken');
       const response = await fetch('/api/admin/upload-image', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({ image: base64 }),
       });
 
       const data = await response.json();

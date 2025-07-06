@@ -1,0 +1,49 @@
+/* styles/globals.css */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+  body {
+    @apply bg-gradient-to-b from-blue-50 to-white text-gray-900 font-georgia;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded font-semibold text-sm bg-gradient-to-b from-blue-500 to-blue-700 text-white shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-75;
+  }
+}
+
+@font-face {
+  font-family: 'Georgia';
+  src: url('/fonts/Georgia.woff2') format('woff2'),
+       url('/fonts/Georgia.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}

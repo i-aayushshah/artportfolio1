@@ -1,0 +1,51 @@
+[
+    {
+      "id": 1,
+      "title": "Sunset Serenity",
+      "image": "/images/sunset-serenity.jpg",
+      "description": "A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.A calming landscape painting featuring a vibrant sunset over serene waters.",
+      "price": 500
+    },
+    {
+      "id": 2,
+      "title": "Urban Rhythm",
+      "image": "/images/urban-rhythm.jpg",
+      "description": "An abstract representation of city life, capturing the energy and movement of urban environments.",
+      "price": 750
+    },
+    {
+      "id": 3,
+      "title": "Floral Dreams",
+      "image": "/images/floral-dreams.jpg",
+      "description": "A delicate watercolor painting of a colorful bouquet, evoking feelings of spring and renewal.",
+      "price": 300
+    },
+    {
+      "id": 4,
+      "title": "Cosmic Journey",
+      "image": "/images/cosmic-journey.jpg",
+      "description": "An otherworldly digital art piece exploring the vastness and mystery of space.",
+      "price": 600
+    },
+    {
+      "id": 5,
+      "title": "Whispers of Nature",
+      "image": "/images/whispers-of-nature.jpg",
+      "description": "A mixed media artwork combining elements of photography and painting to showcase the beauty of natural textures.",
+      "price": 450
+    },
+    {
+      "id": 6,
+      "title": "Emotional Cascade",
+      "image": "/images/emotional-cascade.jpg",
+      "description": "An expressive abstract painting using bold brushstrokes and vibrant colors to convey a range of emotions.",
+      "price": 800
+    },
+    {
+        "id": 7,
+        "title": "Emotional Cascade",
+        "image": "/images/emotional-cascade1.jpg",
+        "description": "An expressive abstract painting using bold brushstrokes and vibrant colors to convey a range of emotions.",
+        "price": 800
+      }
+  ]

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { DocumentTextIcon, HomeIcon, UserIcon, InformationCircleIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
 // Image Upload Component
 function ImageUpload({ label, value, onChange, preview, setPreview, uploading, setUploading }) {
@@ -32,21 +33,51 @@ function ImageUpload({ label, value, onChange, preview, setPreview, uploading, s
 
       const data = await response.json();
       if (data.success) {
+        toast.success('Image uploaded successfully!');
         return data.imagePath;
       } else {
         throw new Error(data.message);
       }
     } catch (error) {
       console.error('Image upload failed:', error);
+      toast.error(`Upload failed: ${error.message}`);
       return null;
     } finally {
       setUploading(false);
     }
   };
 
+  const validateFile = (file) => {
+    // Check file type
+    const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp', 'image/gif'];
+    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.gif'];
+
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+
+    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
+      return 'Please select a valid image file (PNG, JPG, WEBP, or GIF)';
+    }
+
+    // Check file size (5MB = 5 * 1024 * 1024 bytes)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return 'File size must be less than 5MB';
+    }
+
+    return null;
+  };
+
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
+      // Validate file
+      const validationError = validateFile(selectedFile);
+      if (validationError) {
+        toast.error(validationError);
+        e.target.value = ''; // Clear the input
+        return;
+      }
+
       setFile(selectedFile);
 
       // Create preview
@@ -69,28 +100,34 @@ function ImageUpload({ label, value, onChange, preview, setPreview, uploading, s
     e.stopPropagation();
   };
 
-  const handleDrop = async (e) => {
+      const handleDrop = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const droppedFile = files[0];
-      if (droppedFile.type.startsWith('image/')) {
-        setFile(droppedFile);
 
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setPreview(e.target.result);
-        };
-        reader.readAsDataURL(droppedFile);
+      // Validate file
+      const validationError = validateFile(droppedFile);
+      if (validationError) {
+        toast.error(validationError);
+        return;
+      }
 
-        // Upload file
-        const uploadedPath = await handleImageUpload(droppedFile);
-        if (uploadedPath) {
-          onChange(uploadedPath);
-        }
+      setFile(droppedFile);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target.result);
+      };
+      reader.readAsDataURL(droppedFile);
+
+      // Upload file
+      const uploadedPath = await handleImageUpload(droppedFile);
+      if (uploadedPath) {
+        onChange(uploadedPath);
       }
     }
   };
@@ -116,7 +153,7 @@ function ImageUpload({ label, value, onChange, preview, setPreview, uploading, s
               <input
                 id={`image-upload-${label.replace(/\s+/g, '-').toLowerCase()}`}
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpg,image/jpeg,image/webp,image/gif"
                 className="sr-only"
                 onChange={handleFileChange}
                 disabled={uploading}
@@ -124,7 +161,7 @@ function ImageUpload({ label, value, onChange, preview, setPreview, uploading, s
             </label>
             <p className="pl-1">or drag and drop</p>
           </div>
-          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+          <p className="text-xs text-gray-500">PNG, JPG, WEBP, GIF up to 5MB</p>
         </div>
       </div>
       {preview && (
@@ -176,10 +213,10 @@ export default function AdminContent() {
       if (data.success) {
         setContent(data.data);
       } else {
-        setError(data.message);
+        toast.error(data.message);
       }
     } catch (error) {
-      setError('Error fetching content');
+      toast.error('Error fetching content');
     } finally {
       setLoading(false);
     }
@@ -203,14 +240,13 @@ export default function AdminContent() {
 
       const data = await response.json();
       if (data.success) {
-        setSuccess(data.message);
+        toast.success(data.message);
         setContent(data.data);
-        setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(data.message);
+        toast.error(data.message);
       }
     } catch (error) {
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -786,3 +822,4 @@ function FooterForm({ content, onSave, saving }) {
     </form>
   );
 }
+

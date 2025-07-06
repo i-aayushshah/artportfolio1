@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
 export default function AdminArtworks() {
   const [artworks, setArtworks] = useState([]);
@@ -80,12 +81,14 @@ export default function AdminArtworks() {
 
       const data = await response.json();
       if (data.success) {
+        toast.success('Image uploaded successfully!');
         return data.imagePath;
       } else {
         throw new Error(data.message);
       }
     } catch (error) {
-      setError(`Image upload failed: ${error.message}`);
+      console.error('Image upload failed:', error);
+      toast.error(`Image upload failed: ${error.message}`);
       return null;
     } finally {
       setUploadingImage(false);
@@ -113,7 +116,7 @@ export default function AdminArtworks() {
 
       // Validate required fields
       if (!formData.title || !formData.description || (!imageUrl && !imageFile)) {
-        setError('Title, description, and image are required');
+        toast.error('Title, description, and image are required');
         setFormLoading(false);
         return;
       }
@@ -136,15 +139,15 @@ export default function AdminArtworks() {
 
       const data = await response.json();
       if (data.success) {
-        setSuccess(data.message);
+        toast.success(data.message);
         fetchArtworks();
         resetForm();
         setTimeout(() => setShowModal(false), 1500);
       } else {
-        setError(data.message);
+        toast.error(data.message);
       }
     } catch (error) {
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setFormLoading(false);
     }
@@ -166,14 +169,13 @@ export default function AdminArtworks() {
 
       const data = await response.json();
       if (data.success) {
-        setSuccess(data.message);
+        toast.success(data.message);
         fetchArtworks();
-        setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(data.message);
+        toast.error(data.message);
       }
     } catch (error) {
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     }
   };
 
@@ -228,9 +230,37 @@ export default function AdminArtworks() {
     }));
   };
 
+  const validateFile = (file) => {
+    // Check file type
+    const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp', 'image/gif'];
+    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.gif'];
+
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+
+    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
+      return 'Please select a valid image file (PNG, JPG, WEBP, or GIF)';
+    }
+
+    // Check file size (5MB = 5 * 1024 * 1024 bytes)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return 'File size must be less than 5MB';
+    }
+
+    return null;
+  };
+
   const handleImageFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file
+      const validationError = validateFile(file);
+      if (validationError) {
+        toast.error(validationError);
+        e.target.value = ''; // Clear the input
+        return;
+      }
+
       setImageFile(file);
       // Create preview
       const reader = new FileReader();
@@ -248,22 +278,28 @@ export default function AdminArtworks() {
     e.stopPropagation();
   };
 
-  const handleDrop = (e) => {
+    const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
-      if (file.type.startsWith('image/')) {
-        setImageFile(file);
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setImagePreview(e.target.result);
-        };
-        reader.readAsDataURL(file);
+
+      // Validate file
+      const validationError = validateFile(file);
+      if (validationError) {
+        toast.error(validationError);
+        return;
       }
+
+      setImageFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -462,7 +498,7 @@ export default function AdminArtworks() {
                             id="image-upload"
                             name="image-upload"
                             type="file"
-                            accept="image/*"
+                            accept="image/png,image/jpg,image/jpeg,image/webp,image/gif"
                             className="sr-only"
                             onChange={handleImageFileChange}
                             required={!editingArtwork}
@@ -470,7 +506,7 @@ export default function AdminArtworks() {
                         </label>
                         <p className="pl-1">or drag and drop</p>
                       </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                      <p className="text-xs text-gray-500">PNG, JPG, WEBP, GIF up to 5MB</p>
                     </div>
                   </div>
                   {imagePreview && (
